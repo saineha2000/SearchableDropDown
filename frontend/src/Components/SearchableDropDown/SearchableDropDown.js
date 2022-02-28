@@ -27,6 +27,7 @@ function DropDown() {
         sx={{ width: 300 }}
         options={data}
         autoHighlight
+         onChange={(event,value)=>{console.log(value)}}
         onInputChange={(event, newValue) => {
           setsearchWord(newValue);
         }}
