@@ -1,56 +1,60 @@
-import TextField from "@mui/material/TextField";
 import React, { useEffect, useState } from "react";
-import Service1 from "../services/Service1";
-import { Autocomplete, Box, Grid } from "@mui/material";
-function DropDown() {
+import axios from "axios";
+import { Autocomplete, Box, TextField } from "@mui/material";
+function SearchableDropDown(props) {
+  const prop_name = props.prop_name;
+  const url = props.url;
+  const prop_id = props.prop_id;
   const [data, setData] = useState([]);
   const [searchWord, setsearchWord] = useState("");
   useEffect(() => {
-    Service1.getConData().then((res) => {
+    axios.get(url).then((res) => {
       const mydata = res.data;
       setData(mydata);
     });
   }, []);
-
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      Service1.getCountryData(searchWord).then((res) => {
+      axios.get(url + "/" + searchWord).then((res) => {
         setData(res.data);
       });
     }, 10);
     return () => clearTimeout(delayDebounceFn);
-  }, [searchWord]);
+  }, [searchWord, url]);
   return (
-    <Grid sx={{ margin: 5 }}>
+    <React.Fragment>
       <Autocomplete
-        id="country-select-demo"
         sx={{ width: 300 }}
         options={data}
         autoHighlight
-         onChange={(event,value)=>{console.log(value)}}
+        multiple={props.isMulti}
+        onChange={(event, value) => {
+          props.onChange(value);
+        }}
         onInputChange={(event, newValue) => {
           setsearchWord(newValue);
         }}
-        getOptionLabel={(option) => option.name}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
+        getOptionLabel={(option) => option[prop_name]}
+        isOptionEqualToValue={(option, value) =>
+          option[prop_id] === value[prop_id]
+        }
         renderOption={(props, option) => (
           <Box component="li" {...props}>
-            {option.name}
+            {option[prop_name]}
           </Box>
         )}
         renderInput={(params) => (
           <TextField
             {...params}
-            label="country"
+            label={props.label}
             inputProps={{
               ...params.inputProps,
-              autoComplete: "new-password",
             }}
           />
         )}
       />
-    </Grid>
+    </React.Fragment>
   );
 }
 
-export default DropDown;
+export default SearchableDropDown;
